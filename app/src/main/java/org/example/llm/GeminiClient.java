@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class GeminiClient implements LLMClient {
     // Attempting to use the model the user suggested or a standard one
-    private static final String MODEL_NAME = "gemini-2.0-flash-lite";
+    private static final String MODEL_NAME = "gemini-2.5-flash";
 
     private final Client client;
 
@@ -32,6 +32,7 @@ public class GeminiClient implements LLMClient {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public LLMResponse chatWithTools(String systemPrompt, List<ConversationMessage> messages, List<Tool> tools) {
         try {
             // Build conversation history
@@ -88,6 +89,7 @@ public class GeminiClient implements LLMClient {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Schema> mapProperties(Map<String, Object> schemaMap) {
         Map<String, Schema> properties = new HashMap<>();
         Map<String, Object> props = (Map<String, Object>) schemaMap.get("properties");

@@ -83,21 +83,10 @@ Yes, you can export all your data at any time:
 3. Choose format (JSON or CSV)
 4. Download the generated file
 
-## Billing & Plans
+## Need Billing Help?
 
-### What payment methods do you accept?
-- Credit/Debit cards (Visa, Mastercard, Amex)
-- PayPal
-- Bank transfer (Enterprise only)
-
-### Can I upgrade or downgrade my plan?
-Yes, you can change plans at any time from Settings → Subscription. Changes take effect immediately, with prorated billing.
-
-### Do you offer refunds?
-See our refund policy:
-- Full refunds within 14 days (monthly) or 30 days (annual)
-- Partial refunds for unused periods when downgrading
-- Contact billing support for special circumstances
-
-### What happens when my trial ends?
-You'll be asked to select a plan. If you don't, your account will be limited to Basic features. Your data is retained for 30 days.
+For billing-related questions including payments, refunds, plan changes, and subscription management, please contact our Billing Support team. They can assist you with:
+- Payment methods and invoices
+- Plan upgrades and downgrades
+- Refund requests
+- Trial and subscription information

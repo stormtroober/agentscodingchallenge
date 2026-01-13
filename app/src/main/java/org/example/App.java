@@ -86,8 +86,14 @@ public class App {
                 }
 
                 try {
+                    System.out.println("⏳ Processing your request...");
+                    long startTime = System.currentTimeMillis();
                     String response = coordinator.process(userInput, context);
+                    long endTime = System.currentTimeMillis();
+                    double durationSeconds = (endTime - startTime) / 1000.0;
+
                     System.out.println(response);
+                    System.out.printf("\n(⏱️ Response time: %.2fs)%n", durationSeconds);
                 } catch (Exception e) {
                     System.err.println("\n❌ Error processing your request: " + e.getMessage());
                     System.err.println("Please try again or type 'clear' to start over.");

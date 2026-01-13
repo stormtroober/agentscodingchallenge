@@ -52,6 +52,9 @@ public class OpenRefundCaseTool implements Tool {
 
         int caseId = ++caseCounter;
 
+        String formUrl = String.format("https://support.example.org/refund-form?caseId=REF-%d&auth=%s",
+                caseId, UUID.randomUUID().toString().substring(0, 8));
+
         return String.format(
                 "✅ Refund case opened successfully!\n\n" +
                         "**Case Details:**\n" +
@@ -59,10 +62,12 @@ public class OpenRefundCaseTool implements Tool {
                         "- Customer: %s\n" +
                         "- Reason: %s\n" +
                         "- Status: Pending Customer Action\n\n" +
+                        "**Action Required:**\n" +
+                        "Please fill out the official refund request form here:\n" +
+                        "🔗 [%s](%s)\n\n" +
                         "**Next Steps:**\n" +
-                        "A refund request form has been sent to the customer's email. " +
                         "The customer must complete this form within 7 business days. " +
                         "Once received, the refund will be processed according to our refund policy.",
-                caseId, customerId, reason != null ? reason : "Not specified");
+                caseId, customerId, reason != null ? reason : "Not specified", formUrl, formUrl);
     }
 }
