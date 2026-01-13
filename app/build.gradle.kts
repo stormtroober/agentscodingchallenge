@@ -16,8 +16,9 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit test framework.
-    testImplementation(libs.junit)
+    // Use JUnit 5 test framework.
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // This dependency is used by the application.
     implementation(libs.guava)
@@ -46,6 +47,17 @@ application {
 
 tasks.named<JavaExec>("run") {
     standardInput = System.`in`
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+        events("passed", "skipped", "failed")
+    }
+    // Forward test.id system property for filtering individual tests
+    // Usage: ./gradlew :app:test -Dtest.id=1.1
+    systemProperty("test.id", System.getProperty("test.id"))
 }
 
 
