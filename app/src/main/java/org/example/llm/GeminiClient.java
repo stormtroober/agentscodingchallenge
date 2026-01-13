@@ -1,0 +1,143 @@
+package org.example.llm;
+
+import com.google.genai.Client;
+import com.google.genai.types.*;
+import org.example.model.ConversationMessage;
+import org.example.tools.Tool;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * Gemini API client implementation using the official Google Gen AI SDK.
+ */
+public class GeminiClient implements LLMClient {
+    // Attempting to use the model the user suggested or a standard one
+    private static final String MODEL_NAME = "gemini-2.0-flash-lite";
+
+    private final Client client;
+
+    public GeminiClient(String apiKey) {
+        this.client = Client.builder().apiKey(apiKey).build();
+    }
+
+    @Override
+    public String chat(String systemPrompt, List<ConversationMessage> messages) {
+        LLMResponse response = chatWithTools(systemPrompt, messages, List.of());
+        return response.text();
+    }
+
+    @Override
+    public LLMResponse chatWithTools(String systemPrompt, List<ConversationMessage> messages, List<Tool> tools) {
+        try {
+            // Build conversation history
+            List<Content> history = messages.stream()
+                    .map(msg -> Content.builder()
+                            .role(msg.role().equals("assistant") ? "model" : "user")
+                            .parts(List.of(Part.builder().text(msg.content()).build()))
+                            .build())
+                    .collect(Collectors.toList());
+
+            // Configure tools
+            List<com.google.genai.types.Tool> sdkTools = new ArrayList<>();
+            if (!tools.isEmpty()) {
+                List<FunctionDeclaration> functionDeclarations = new ArrayList<>();
+                for (Tool tool : tools) {
+                    functionDeclarations.add(FunctionDeclaration.builder()
+                            .name(tool.getName())
+                            .description(tool.getDescription())
+                            .parameters(Schema.builder()
+                                    .type("OBJECT")
+                                    .properties(mapProperties(tool.getParametersSchema()))
+                                    .required((List<String>) tool.getParametersSchema().get("required"))
+                                    .build())
+                            .build());
+                }
+
+                sdkTools.add(com.google.genai.types.Tool.builder()
+                        .functionDeclarations(functionDeclarations)
+                        .build());
+            }
+
+            // Configure generation config
+            GenerateContentConfig.Builder configBuilder = GenerateContentConfig.builder()
+                    .temperature(0.7f)
+                    .systemInstruction(Content.builder()
+                            .parts(List.of(Part.builder().text(systemPrompt).build()))
+                            .build());
+
+            if (!sdkTools.isEmpty()) {
+                configBuilder.tools(sdkTools);
+            }
+
+            // Execute request
+            GenerateContentResponse response = client.models.generateContent(
+                    MODEL_NAME,
+                    history,
+                    configBuilder.build());
+
+            return parseResponse(response);
+
+        } catch (Exception e) {
+            // If the default model fails, maybe try another fallback or just report error
+            throw new RuntimeException("Failed to call Gemini API via SDK (" + MODEL_NAME + ")", e);
+        }
+    }
+
+    private Map<String, Schema> mapProperties(Map<String, Object> schemaMap) {
+        Map<String, Schema> properties = new HashMap<>();
+        Map<String, Object> props = (Map<String, Object>) schemaMap.get("properties");
+
+        if (props != null) {
+            for (Map.Entry<String, Object> entry : props.entrySet()) {
+                Map<String, Object> propDetails = (Map<String, Object>) entry.getValue();
+                properties.put(entry.getKey(), Schema.builder()
+                        .type("STRING")
+                        .description((String) propDetails.get("description"))
+                        .build());
+            }
+        }
+        return properties;
+    }
+
+    private LLMResponse parseResponse(GenerateContentResponse response) {
+        List<Candidate> candidates = response.candidates().orElse(Collections.emptyList());
+        if (candidates.isEmpty()) {
+            return LLMResponse.textOnly("No response generated.");
+        }
+
+        Candidate candidate = candidates.get(0);
+        Content content = candidate.content().orElse(null);
+
+        List<LLMResponse.ToolCall> toolCalls = new ArrayList<>();
+        StringBuilder textBuilder = new StringBuilder();
+
+        if (content != null && content.parts().isPresent()) {
+            for (Part part : content.parts().get()) {
+                if (part.text().isPresent()) {
+                    textBuilder.append(part.text().get());
+                }
+
+                if (part.functionCall().isPresent()) {
+                    FunctionCall call = part.functionCall().get();
+                    Map<String, Object> args = call.args().orElse(Collections.emptyMap());
+                    Map<String, String> stringArgs = new HashMap<>();
+                    if (args != null) {
+                        args.forEach((k, v) -> stringArgs.put(k, String.valueOf(v)));
+                    }
+                    toolCalls.add(new LLMResponse.ToolCall(call.name().orElse("unknown_tool"), stringArgs));
+                }
+            }
+        }
+
+        if (!toolCalls.isEmpty()) {
+            return LLMResponse.withToolCalls(toolCalls);
+        }
+
+        return LLMResponse.textOnly(textBuilder.toString());
+    }
+}

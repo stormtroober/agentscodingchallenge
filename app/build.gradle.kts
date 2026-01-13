@@ -21,6 +21,15 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
+    
+    // JSON parsing for LLM API
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Dotenv for loading environment variables
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
+    
+    // Google Gen AI SDK
+    implementation("com.google.genai:google-genai:1.34.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -34,3 +43,9 @@ application {
     // Define the main class for the application.
     mainClass = "org.example.App"
 }
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
+
+

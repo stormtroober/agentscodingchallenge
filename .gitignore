@@ -45,3 +45,6 @@ out/
 .project
 .settings/
 bin/
+
+# Environment variables
+.env
