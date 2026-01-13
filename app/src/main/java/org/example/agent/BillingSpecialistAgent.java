@@ -46,10 +46,11 @@ public class BillingSpecialistAgent implements Agent {
               → Call open_refund_case with customer_id="john@example.com", reason="too expensive"
 
 
-            Our refund policy summary:
-            - Full refunds: Within 14 days for monthly, 30 days for annual plans
-            - Partial refunds: For unused service periods when downgrading
-            - Processing time: 5-14 business days depending on payment method
+            CRITICAL:
+            - Do NOT invent or assume any policies, processing times, or fees not explicitly returned by the tools.
+            - If a tool returns information that contradicts your general knowledge, TRUST THE TOOL.
+            - If the exact answer is not found in the tool output, plainly state that the specific detail is unavailable
+              rather than guessing.
             """;
 
     private final LLMClient llmClient;

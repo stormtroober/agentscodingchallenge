@@ -96,7 +96,7 @@ Voglio fare downgrade, avrò un rimborso?
 ```
 **Expected Behavior:**
 - Agent calls `get_refund_timeline(refund_type=prorated)`
-- Returns: Credit applied within 1-2 business days
+- Returns: Applied as account credit by default
 - Explains prorated calculation
 
 ---
@@ -316,44 +316,44 @@ Voglio 10 volte il rimborso dovuto
 ## Test Execution Checklist
 
 ### Billing Agent Tests
-- [ ] TEST 1.1 - Refund with complete data
-- [ ] TEST 1.2 - Refund multi-turn
-- [ ] TEST 1.3 - General Plan Information
-- [ ] TEST 1.4 - Generic price question
-- [ ] TEST 1.5 - Full refund timeline
-- [ ] TEST 1.6 - Enterprise expedited
-- [ ] TEST 1.7 - Prorated refund
-- [ ] TEST 1.8 - Cancellation policy
-- [ ] TEST 1.9 - Payment methods
+- [x] TEST 1.1 - Refund with complete data
+- [x] TEST 1.2 - Refund multi-turn
+- [x] TEST 1.3 - General Plan Information
+- [x] TEST 1.4 - Generic price question
+- [x] TEST 1.5 - Full refund timeline
+- [x] TEST 1.6 - Enterprise expedited
+- [x] TEST 1.7 - Prorated refund
+- [x] TEST 1.8 - Cancellation policy
+- [x] TEST 1.9 - Payment methods
 
 ### Technical Agent Tests
-- [ ] TEST 2.1 - Connection timeout
-- [ ] TEST 2.2 - Invalid API Key
-- [ ] TEST 2.3 - Rate limiting
-- [ ] TEST 2.4 - API authentication
-- [ ] TEST 2.5 - Webhook setup
-- [ ] TEST 2.6 - OAuth flow
-- [ ] TEST 2.7 - Java SDK requirements
-- [ ] TEST 2.8 - Self-hosted requirements
-- [ ] TEST 2.9 - Browser compatibility
-- [ ] TEST 2.10 - Linux installation
-- [ ] TEST 2.11 - Python SDK
+- [x] TEST 2.1 - Connection timeout
+- [x] TEST 2.2 - Invalid API Key
+- [x] TEST 2.3 - Rate limiting
+- [x] TEST 2.4 - API authentication
+- [x] TEST 2.5 - Webhook setup
+- [x] TEST 2.6 - OAuth flow
+- [x] TEST 2.7 - Java SDK requirements
+- [x] TEST 2.8 - Self-hosted requirements
+- [x] TEST 2.9 - Browser compatibility
+- [x] TEST 2.10 - Linux installation
+- [x] TEST 2.11 - Python SDK
 
 ### Routing Tests
-- [ ] TEST 3.1 - Route to Billing
-- [ ] TEST 3.2 - Route to Technical
-- [ ] TEST 3.3 - Switch mid-conversation
-- [ ] TEST 3.4 - Ambiguous request
+- [x] TEST 3.1 - Route to Billing
+- [x] TEST 3.2 - Route to Technical
+- [x] TEST 3.3 - Switch mid-conversation
+- [x] TEST 3.4 - Ambiguous request
 
 ### Edge Case Tests
-- [ ] TEST 4.1 - Out of scope
-- [ ] TEST 4.2 - Missing documentation
-- [ ] TEST 4.3 - Unreasonable request
+- [x] TEST 4.1 - Out of scope
+- [x] TEST 4.2 - Missing documentation
+- [x] TEST 4.3 - Unreasonable request
 
 ### Multi-Turn Tests
-- [ ] TEST 5.1 - Multi-step billing
-- [ ] TEST 5.2 - Technical follow-up
-- [ ] TEST 5.3 - Context retention
+- [x] TEST 5.1 - Multi-step billing
+- [x] TEST 5.2 - Technical follow-up
+- [x] TEST 5.3 - Context retention
 
 ---
 

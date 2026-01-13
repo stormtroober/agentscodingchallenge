@@ -49,12 +49,14 @@
 
 ## Processing Times
 
-### By Payment Method
-| Method | Processing Time |
-|--------|----------------|
+### Accepted Payment Methods
+We accept the following payment methods for all plans:
+
+| Method | Processing Time (Refunds) |
+|--------|--------------------------|
 | Credit/Debit Card | 5-10 business days |
 | PayPal | 3-5 business days |
-| Bank Transfer | 7-14 business days |
+| Bank Transfer (Enterprise only) | 7-14 business days |
 
 ### By Plan Type
 - Basic/Professional: Standard processing

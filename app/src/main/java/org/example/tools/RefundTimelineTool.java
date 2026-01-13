@@ -57,12 +57,12 @@ public class RefundTimelineTool implements Tool {
                 notes = "Full refunds are processed to the original payment method.";
             }
             case "partial" -> {
-                timeline = "7-10 business days";
+                timeline = "Applied as account credit by default (immediate); standard processing if refunded to payment method";
                 eligibility = "Available for unused service periods when downgrading plans";
                 notes = "Partial refund amount is calculated based on remaining days in the billing cycle.";
             }
             case "prorated" -> {
-                timeline = "Applied as credit within 1-2 business days";
+                timeline = "Applied as account credit by default";
                 eligibility = "Automatically applied when switching between plans mid-cycle";
                 notes = "Prorated amounts are typically applied as account credit rather than direct refund.";
             }
