@@ -26,7 +26,7 @@ public class BillingSpecialistAgent implements Agent {
          NOTE: You can call this with ONLY refund_type OR ONLY plan_type to get general info!
       3. search_billing_policy - Search our billing policy for detailed information about plans,
          pricing, refunds, cancellation procedures, and payment methods
-         Parameters: query (search term)
+         Parameters: query (search term - ALWAYS translate to English)
 
       IMPORTANT RULES:
       1. Always be helpful, empathetic, and professional.

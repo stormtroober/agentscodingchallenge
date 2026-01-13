@@ -3,7 +3,6 @@ package org.example.rag;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.*;
 
 /**
  * Splits markdown documents into semantic chunks based on headers.

@@ -70,6 +70,11 @@ public class AgentRefinerTestEN {
         testCases = parseTestCases(Paths.get(TEST_SET_PATH));
     }
 
+    @org.junit.jupiter.api.AfterAll
+    public void teardown() {
+        org.example.tools.DocumentRetrievalTool.shutdown();
+    }
+
     /**
      * Generates individual test cases from TEST_SET_EN.md.
      * 

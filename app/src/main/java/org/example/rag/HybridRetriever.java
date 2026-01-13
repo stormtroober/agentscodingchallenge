@@ -82,6 +82,8 @@ public class HybridRetriever {
         return retrieve(query, topK, null);
     }
 
+    private final Map<String, List<ScoredChunk>> retrievalCache = new java.util.concurrent.ConcurrentHashMap<>();
+
     /**
      * Retrieve relevant chunks with optional source filter.
      * 
@@ -93,6 +95,14 @@ public class HybridRetriever {
     public List<ScoredChunk> retrieve(String query, int topK, String sourceFilter) {
         if (!initialized)
             initialize();
+
+        // Check cache
+        String cacheKey = query + "|" + topK + "|" + (sourceFilter != null ? sourceFilter : "NULL");
+        if (retrievalCache.containsKey(cacheKey)) {
+            // System.out.println("[HybridRetriever] Returning cached result for: " +
+            // query);
+            return retrievalCache.get(cacheKey);
+        }
 
         // System.out.println("\n[HybridRetriever] Processing query: \"" + query + "\"
         // (Filter: " + sourceFilter + ")");
@@ -142,6 +152,7 @@ public class HybridRetriever {
         // + ") " + snippet);
         // }
 
+        retrievalCache.put(cacheKey, reranked);
         return reranked;
     }
 
@@ -162,5 +173,9 @@ public class HybridRetriever {
     public void close() {
         bm25Index.close();
         embeddingService.close();
+
+        // Reset state so it can be re-initialized if needed
+        initialized = false;
+        retrievalCache.clear();
     }
 }

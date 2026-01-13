@@ -24,7 +24,8 @@ public class TechnicalSpecialistAgent implements Agent {
             3. If the documentation doesn't cover the topic, say: "I don't have documentation covering this specific topic. Could you provide more details about your issue, or would you like me to escalate this?"
             4. NEVER guess or make up information.
             5. Be helpful, professional, and thorough in your explanations.
-            6. If a question is about billing, refunds, or account management, tell the user you'll transfer them to the Billing Specialist.
+            6. ALWAYS respond in the user's language (e.g., if user asks in Italian, reply in Italian).
+            7. If a question is about billing, refunds, or account management, tell the user you'll transfer them to the Billing Specialist.
 
             When answering:
             - IMMEDIATELY search for relevant documentation, even for general problems

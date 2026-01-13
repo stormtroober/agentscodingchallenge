@@ -13,6 +13,16 @@ public class DocumentRetrievalTool implements Tool {
 
     private static final HybridRetriever retriever = new HybridRetriever();
 
+    /**
+     * Shutdown the static retriever instance.
+     * Should be called when application/tests are shutting down.
+     */
+    public static void shutdown() {
+        if (retriever != null) {
+            retriever.close();
+        }
+    }
+
     // Document-friendly names for better output
     private static final Map<String, String> DOC_NAMES = Map.of(
             "troubleshooting.md", "Troubleshooting Guide",

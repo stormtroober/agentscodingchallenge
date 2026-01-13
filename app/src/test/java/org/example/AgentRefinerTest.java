@@ -56,6 +56,11 @@ public class AgentRefinerTest {
         testCases = parseTestCases(Paths.get(TEST_SET_PATH));
     }
 
+    @org.junit.jupiter.api.AfterAll
+    public void teardown() {
+        org.example.tools.DocumentRetrievalTool.shutdown();
+    }
+
     /**
      * Generates individual test cases from TEST_SET.md.
      * 
@@ -220,7 +225,7 @@ public class AgentRefinerTest {
                 // For simplicity, we'll try to detect the "Input:" block or Table row
 
                 // Standard block detection
-                if (line.startsWith("**Input:**") || line.startsWith("**Turn 1 Input:**")) {
+                if (line.startsWith("**Input:**") || line.matches("\\*\\*Turn \\d+ Input:\\*\\*")) {
                     // Parse standard blocks (handle multi-turn block format roughly if needed,
                     // but specifically look for code blocks)
                     // Look ahead for code block

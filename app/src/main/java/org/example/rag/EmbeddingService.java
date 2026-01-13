@@ -103,6 +103,8 @@ public class EmbeddingService implements AutoCloseable {
         predictor = model.newPredictor();
     }
 
+    private final Map<String, float[]> embeddingCache = new java.util.concurrent.ConcurrentHashMap<>();
+
     /**
      * Embed a single text.
      * 
@@ -116,16 +118,24 @@ public class EmbeddingService implements AutoCloseable {
 
         String prefixedText = (isQuery ? QUERY_PREFIX : DOCUMENT_PREFIX) + text;
 
+        // Check cache first
+        if (embeddingCache.containsKey(prefixedText)) {
+            return embeddingCache.get(prefixedText);
+        }
+
         if (useFallback) {
-            return fallbackEmbed(prefixedText);
+            float[] result = fallbackEmbed(prefixedText);
+            embeddingCache.put(prefixedText, result);
+            return result;
         }
 
         try {
             float[] embedding = predictor.predict(prefixedText);
             // Truncate to requested dimension if using Matryoshka
             if (embedding.length > embeddingDimension) {
-                return Arrays.copyOf(embedding, embeddingDimension);
+                embedding = Arrays.copyOf(embedding, embeddingDimension);
             }
+            embeddingCache.put(prefixedText, embedding);
             return embedding;
         } catch (Exception e) {
             System.err.println("[EmbeddingService] Embedding failed: " + e.getMessage());
@@ -190,6 +200,9 @@ public class EmbeddingService implements AutoCloseable {
             predictor.close();
         if (model != null)
             model.close();
+
+        initialized = false;
+        embeddingCache.clear();
     }
 
     /**
