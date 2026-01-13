@@ -36,15 +36,42 @@ public class RefundTimelineTool implements Tool {
         properties.put("plan_type", planTypeProp);
 
         schema.put("properties", properties);
-        schema.put("required", List.of("refund_type"));
+        // No required fields - can query by plan type alone for general timeline info
+        schema.put("required", List.of());
 
         return schema;
     }
 
     @Override
     public String execute(Map<String, String> parameters) {
-        String refundType = parameters.getOrDefault("refund_type", "full").toLowerCase();
+        String refundType = parameters.get("refund_type");
         String planType = parameters.getOrDefault("plan_type", "basic").toLowerCase();
+
+        // If only plan_type is specified (especially Enterprise), give general timeline
+        if (refundType == null || refundType.isEmpty()) {
+            if (planType.contains("enterprise")) {
+                return String.format(
+                        "⏱️ **Enterprise Refund Timeline**\n\n" +
+                                "**Processing Time:** 2-3 business days (expedited processing)\n\n" +
+                                "**Enterprise Benefits:**\n" +
+                                "- Expedited processing for all refund types\n" +
+                                "- Dedicated support line for urgent matters\n" +
+                                "- Priority handling by your account manager\n\n" +
+                                "**Refund Types Available:**\n" +
+                                "- Full refund: Within 30 days of purchase\n" +
+                                "- Partial refund: For unused service when downgrading\n" +
+                                "- Prorated credit: When switching plans mid-cycle\n\n" +
+                                "**Payment Method Processing:**\n" +
+                                "- Credit/Debit Card: 5-10 business days after processing\n" +
+                                "- PayPal: 3-5 business days\n" +
+                                "- Bank Transfer: 7-14 business days");
+            } else {
+                // Default to general info for non-enterprise
+                refundType = "full";
+            }
+        }
+
+        refundType = refundType.toLowerCase();
 
         String timeline;
         String eligibility;

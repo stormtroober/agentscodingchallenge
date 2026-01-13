@@ -17,11 +17,14 @@ import java.util.stream.Collectors;
  */
 public class GeminiClient implements LLMClient {
     // Attempting to use the model the user suggested or a standard one
-    private static final String MODEL_NAME = "gemini-2.5-flash";
+    private static final String MODEL_NAME = "gemini-2.0-flash";
 
     private final Client client;
 
     public GeminiClient(String apiKey) {
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IllegalArgumentException("API Key cannot be null or empty");
+        }
         this.client = Client.builder().apiKey(apiKey).build();
     }
 
@@ -84,6 +87,7 @@ public class GeminiClient implements LLMClient {
             return parseResponse(response);
 
         } catch (Exception e) {
+            e.printStackTrace();
             // If the default model fails, maybe try another fallback or just report error
             throw new RuntimeException("Failed to call Gemini API via SDK (" + MODEL_NAME + ")", e);
         }
