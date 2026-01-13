@@ -18,9 +18,15 @@ public class CoordinatorAgent implements Agent {
             1. TECHNICAL - Handles: product features, errors, bugs, integrations, API questions,
                troubleshooting, system requirements, installation, configuration
             2. BILLING - Handles: refunds, payments, subscriptions, plan changes, pricing,
-               invoices, account charges, billing disputes
+               invoices, account charges, billing disputes, customer identification (plan type, account status)
             3. UNKNOWN - Use this ONLY when the question is completely unrelated to our support
                (e.g., weather, sports, general knowledge questions)
+
+            IMPORTANT:
+            - If the user identifies themselves or their plan (e.g., "I'm an Enterprise customer", "I have Basic plan"),
+              route to BILLING since this is account/subscription related information.
+            - When in doubt between BILLING and TECHNICAL, prefer routing to the specialist.
+            - UNKNOWN should be very rare - only for completely off-topic requests.
 
             RESPOND WITH EXACTLY ONE WORD: TECHNICAL, BILLING, or UNKNOWN
 

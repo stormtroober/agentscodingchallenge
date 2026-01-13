@@ -24,10 +24,24 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+/**
+ * Agent Refiner Test - English Version
+ * 
+ * Tests the multi-agent system with English inputs from TEST_SET_EN.md
+ * 
+ * Run all English tests:
+ * ./gradlew :app:test -Dtest.id.en=
+ * 
+ * Run a specific test by ID:
+ * ./gradlew :app:test -Dtest.id.en=1.1
+ * 
+ * Run all chapter tests:
+ * ./gradlew :app:test -Dtest.id.en=1
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AgentRefinerTest {
+public class AgentRefinerTestEN {
 
-    private static final String TEST_SET_PATH = "../TEST_SET.md";
+    private static final String TEST_SET_PATH = "../TEST_SET_EN.md";
     private LLMClient llmClient;
     private CoordinatorAgent agent;
     private List<TestCase> testCases;
@@ -57,34 +71,34 @@ public class AgentRefinerTest {
     }
 
     /**
-     * Generates individual test cases from TEST_SET.md.
+     * Generates individual test cases from TEST_SET_EN.md.
      * 
      * Run all tests:
-     * ./gradlew :app:test --tests "org.example.AgentRefinerTest"
+     * ./gradlew :app:test --tests "org.example.AgentRefinerTestEN"
      * 
      * Run a specific test by ID:
-     * ./gradlew :app:test --tests "org.example.AgentRefinerTest" -Dtest.id=1.1
-     * ./gradlew :app:test --tests "org.example.AgentRefinerTest" -Dtest.id=2.3
+     * ./gradlew :app:test -Dtest.id.en=1.1
+     * ./gradlew :app:test -Dtest.id.en=2.3
      */
     @TestFactory
     public Collection<DynamicTest> generateTests() {
         List<DynamicTest> dynamicTests = new ArrayList<>();
 
         // Check if a specific test ID is requested via system property
-        String filterTestId = System.getProperty("test.id");
-        String filterTestIdEn = System.getProperty("test.id.en");
+        String filterTestId = System.getProperty("test.id.en");
+        String filterTestIdIt = System.getProperty("test.id");
 
-        // If English filter is set (property exists), skip Italian tests entirely
-        // Note: empty string means "run all English tests", still skip Italian
-        boolean englishFilterActive = filterTestIdEn != null && !filterTestIdEn.equals("null");
-        if (englishFilterActive) {
-            System.out.println(">>> [IT] Skipping Italian tests (English filter active)");
+        // If Italian filter is set (property exists), skip English tests entirely
+        // Note: empty string means "run all Italian tests", still skip English
+        boolean italianFilterActive = filterTestIdIt != null && !filterTestIdIt.equals("null");
+        if (italianFilterActive) {
+            System.out.println(">>> [EN] Skipping English tests (Italian filter active)");
             return dynamicTests;
         }
 
         // Debug: show how many test cases were parsed
-        System.out.println(">>> [IT] Parsed " + testCases.size() + " test cases from TEST_SET.md");
-        System.out.println(">>> [IT] Filter test.id = " + filterTestId);
+        System.out.println(">>> [EN] Parsed " + testCases.size() + " test cases from TEST_SET_EN.md");
+        System.out.println(">>> [EN] Filter test.id.en = " + filterTestId);
 
         for (TestCase testCase : testCases) {
             // Skip if filter is set (not null, not "null" string, not empty) and doesn't
@@ -98,19 +112,19 @@ public class AgentRefinerTest {
                 }
             }
 
-            // Create a test name like "[1.1] Refund request with complete data"
-            String testName = "[" + testCase.id + "] " + testCase.title;
+            // Create a test name like "[EN 1.1] Refund request with complete data"
+            String testName = "[EN " + testCase.id + "] " + testCase.title;
 
             dynamicTests.add(dynamicTest(testName, () -> runSingleTest(testCase)));
         }
 
-        System.out.println(">>> [IT] Generated " + dynamicTests.size() + " dynamic tests");
+        System.out.println(">>> [EN] Generated " + dynamicTests.size() + " dynamic tests");
 
         return dynamicTests;
     }
 
     private void runSingleTest(TestCase testCase) {
-        System.out.println(">>> STARTING TEST CASE: " + testCase.id + " - " + testCase.title);
+        System.out.println(">>> [EN] STARTING TEST CASE: " + testCase.id + " - " + testCase.title);
         ConversationContext context = new ConversationContext();
 
         int turnIndex = 1;
@@ -135,7 +149,7 @@ public class AgentRefinerTest {
             }
             turnIndex++;
         }
-        System.out.println(">>> TEST CASE " + testCase.id + " PASSED ✅");
+        System.out.println(">>> [EN] TEST CASE " + testCase.id + " PASSED ✅");
     }
 
     private VerificationResult verifyWithJudge(TestCase testCase, Turn turn, String actualResponse) {
@@ -156,7 +170,7 @@ public class AgentRefinerTest {
 
                         IMPORTANT GUIDELINES:
                         - Focus on SEMANTIC correctness, not exact wording.
-                        - If the expected says "2-3 business days" and the response says "2-3 giorni lavorativi" (Italian), that's a PASS.
+                        - The response should be in English since input was in English.
                         - If the response contains the required information, even with additional helpful details, that's a PASS.
                         - Only FAIL if the response is missing the key expected information or provides incorrect information.
                         - Tool calls: If expected says "calls X tool" but response contains the correct info, assume tool was called (PASS).

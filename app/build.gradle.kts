@@ -55,9 +55,15 @@ tasks.named<Test>("test") {
         showStandardStreams = true
         events("passed", "skipped", "failed")
     }
-    // Forward test.id system property for filtering individual tests
+    // Forward test.id system property for filtering individual tests (Italian)
     // Usage: ./gradlew :app:test -Dtest.id=1.1
-    systemProperty("test.id", System.getProperty("test.id"))
+    // Only pass if explicitly set
+    System.getProperty("test.id")?.let { systemProperty("test.id", it) }
+    
+    // Forward test.id.en system property for filtering English tests
+    // Usage: ./gradlew :app:test -Dtest.id.en=1.1
+    // Only pass if explicitly set
+    System.getProperty("test.id.en")?.let { systemProperty("test.id.en", it) }
 }
 
 

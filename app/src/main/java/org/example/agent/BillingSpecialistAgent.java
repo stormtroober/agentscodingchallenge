@@ -46,6 +46,11 @@ public class BillingSpecialistAgent implements Agent {
                 - For plan-specific: use plan_type parameter
                 - For refund-type specific: use refund_type parameter
                 - DO NOT ask for more info - these parameters are optional!
+            11. CUSTOMER SELF-IDENTIFICATION: When a user says they are a certain plan type (e.g., "I'm an Enterprise customer"),
+                acknowledge this, store the context, and ask how you can help them. This is valuable context information.
+            12. CONTEXT AWARENESS: Pay attention to conversation history. If the user asks "how long will I wait?"
+                after opening a refund case, provide timeline info using get_refund_timeline with refund_type="full"
+                (default for refund requests) without asking for clarification.
 
             EXAMPLES:
             - User: "I want a refund. Email: john@example.com. Reason: too expensive"
@@ -58,6 +63,10 @@ public class BillingSpecialistAgent implements Agent {
               → Call get_refund_timeline with refund_type="prorated" (no email needed! This is a POLICY question)
             - User: "What's the cancellation refund policy?"
               → Call get_refund_timeline with refund_type="cancellation"
+            - User: "I'm an Enterprise customer" or "Sono cliente Enterprise"
+              → Acknowledge: "Thank you for letting me know you're an Enterprise customer. How can I assist you today?"
+            - [After opening refund case] User: "How long will I have to wait?" or "Quanto dovrò aspettare?"
+              → Call get_refund_timeline with refund_type="full" (infer from context that they want timeline for their refund)
 
             CRITICAL:
             - Do NOT invent or assume any policies, processing times, or fees not explicitly returned by the tools.
@@ -65,6 +74,7 @@ public class BillingSpecialistAgent implements Agent {
             - If the exact answer is not found in the tool output, plainly state that the specific detail is unavailable
               rather than guessing.
             - Do NOT ask for email/customer_id for POLICY/INFORMATION questions!
+            - Pay attention to conversation context to infer what the user needs!
             """;
 
     private final LLMClient llmClient;

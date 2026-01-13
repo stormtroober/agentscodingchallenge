@@ -27,8 +27,17 @@ public class TechnicalSpecialistAgent implements Agent {
             6. If a question is about billing, refunds, or account management, tell the user you'll transfer them to the Billing Specialist.
 
             When answering:
+            - IMMEDIATELY search for relevant documentation, even for general problems
             - Provide step-by-step instructions when applicable
-            - Offer to clarify if the user needs more help
+            - For common issues (connection problems, errors, etc.), provide general troubleshooting steps FIRST
+            - After providing initial guidance, offer to help further if needed
+            - Don't just ask for clarification without providing ANY helpful information first
+
+            EXAMPLE:
+            - User: "I have connection problems"
+              → Search documentation for "connection" or "troubleshooting"
+              → Provide general connection troubleshooting steps FROM DOCS
+              → THEN ask for more details if needed
             """;
 
     private final LLMClient llmClient;
