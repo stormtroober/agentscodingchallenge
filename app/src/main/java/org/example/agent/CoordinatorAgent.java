@@ -54,110 +54,45 @@ public class CoordinatorAgent implements Agent {
         this.billingAgent = new BillingSpecialistAgent(llmClient);
     }
 
-    private static final String TRANSLATION_PROMPT = """
-            You are a precise translator.
-            Translate the following user message to English.
-            If the message is already in English, return it exactly as is.
-            Do not add any explanations, preambles, or extra text. Just the translation.
-            """;
-
-    private static final String LANGUAGE_DETECTION_PROMPT = """
-            Detect the language of the following message.
-            Respond with ONLY the ISO 639-1 language code (e.g., 'en' for English, 'it' for Italian, 'es' for Spanish, 'de' for German, 'fr' for French).
-            Do not add any explanation. Just the two-letter code.
-            """;
-
-    private static final String RESPONSE_TRANSLATION_PROMPT = """
-            You are a precise translator. Translate the following support agent response to %s.
-            Maintain the same tone, formatting (including markdown, bullet points, emojis), and meaning.
-            If the text is already in %s, return it as is.
-            Do not add any explanations or preambles. Just the translation.
-            """;
-
     @Override
     public String process(String userMessage, ConversationContext context) {
-        // 1. Detect the user's language
-        String userLanguage = detectLanguage(userMessage);
-
-        // 2. Translate message to English to ensure consistent understanding and tool
-        // usage
-        String translatedMessage = translateToEnglish(userMessage);
-
-        // 3. Determine which agent should handle this message (using English content)
-        AgentType targetAgent = routeMessage(translatedMessage, context);
+        // Direct routing without translation - allowing the agents to handle
+        // multilingual input naturally
+        AgentType targetAgent = routeMessage(userMessage, context);
 
         String response;
         String respondingAgent;
 
         switch (targetAgent) {
             case TECHNICAL -> {
-                response = technicalAgent.process(translatedMessage, context);
+                response = technicalAgent.process(userMessage, context);
                 respondingAgent = "TECHNICAL";
             }
             case BILLING -> {
-                response = billingAgent.process(translatedMessage, context);
+                response = billingAgent.process(userMessage, context);
                 respondingAgent = "BILLING";
             }
             default -> {
+                // For unknown intent, we could use an LLM here to generate a localized
+                // response,
+                // but for now we keep the static response or could ideally ask the LLM to
+                // apologize in the user's language.
+                // Given the instruction to remove translation logic, we pass the static
+                // response.
+                // A better approach for "Unknown" in a multilingual system would be to let a
+                // generalist agent handle it.
+                // However, sticking to the existing pattern:
                 response = UNKNOWN_RESPONSE;
                 respondingAgent = "COORDINATOR";
             }
         }
 
-        // 4. Translate the response back to the user's language (if not English)
-        String localizedResponse = translateResponseToUserLanguage(response, userLanguage);
-
-        // Update context with the English interaction (for consistent agent reasoning)
-        context.addMessage(ConversationMessage.user(translatedMessage));
+        // Update context with the interaction
+        context.addMessage(ConversationMessage.user(userMessage));
         context.addMessage(ConversationMessage.assistant(response, respondingAgent));
         context.setCurrentAgentType(respondingAgent);
 
-        return formatResponse(localizedResponse, respondingAgent);
-    }
-
-    private String detectLanguage(String message) {
-        String languageCode = llmClient.chat(LANGUAGE_DETECTION_PROMPT,
-                List.of(ConversationMessage.user(message))).trim().toLowerCase();
-        // Default to English if detection fails or returns unexpected value
-        if (languageCode.length() != 2) {
-            return "en";
-        }
-        return languageCode;
-    }
-
-    private String translateToEnglish(String originalMessage) {
-        return llmClient.chat(TRANSLATION_PROMPT,
-                List.of(ConversationMessage.user(originalMessage))).trim();
-    }
-
-    private String translateResponseToUserLanguage(String response, String languageCode) {
-        // Skip translation if user's language is English
-        if ("en".equals(languageCode)) {
-            return response;
-        }
-
-        String languageName = getLanguageName(languageCode);
-        String prompt = String.format(RESPONSE_TRANSLATION_PROMPT, languageName, languageName);
-
-        return llmClient.chat(prompt, List.of(ConversationMessage.user(response))).trim();
-    }
-
-    private String getLanguageName(String languageCode) {
-        return switch (languageCode) {
-            case "it" -> "Italian";
-            case "es" -> "Spanish";
-            case "de" -> "German";
-            case "fr" -> "French";
-            case "pt" -> "Portuguese";
-            case "nl" -> "Dutch";
-            case "pl" -> "Polish";
-            case "ru" -> "Russian";
-            case "ja" -> "Japanese";
-            case "zh" -> "Chinese";
-            case "ko" -> "Korean";
-            case "ar" -> "Arabic";
-            default -> "the detected language (" + languageCode + ")";
-        };
+        return formatResponse(response, respondingAgent);
     }
 
     private AgentType routeMessage(String userMessage, ConversationContext context) {

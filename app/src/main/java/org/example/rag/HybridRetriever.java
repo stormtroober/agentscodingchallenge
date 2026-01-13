@@ -1,0 +1,166 @@
+package org.example.rag;
+
+import java.util.*;
+
+/**
+ * Hybrid retriever that orchestrates the full RAG pipeline:
+ * 1. BM25 search (lexical)
+ * 2. Vector search (semantic)
+ * 3. RRF fusion
+ * 4. Reranking
+ */
+public class HybridRetriever {
+
+    private final DocumentChunker chunker;
+    private final BM25Index bm25Index;
+    private final VectorStore vectorStore;
+    private final EmbeddingService embeddingService;
+    private final RRFMerger rrfMerger;
+    private final Reranker reranker;
+
+    private boolean initialized = false;
+
+    // Configuration
+    private static final int BM25_TOP_K = 50;
+    private static final int VECTOR_TOP_K = 50;
+    private static final int RRF_TOP_K = 20;
+    private static final int FINAL_TOP_K = 5;
+
+    /**
+     * Create a new hybrid retriever with all components.
+     */
+    public HybridRetriever() {
+        this.chunker = new DocumentChunker();
+        this.bm25Index = new BM25Index();
+        this.vectorStore = new VectorStore();
+        this.embeddingService = new EmbeddingService();
+        this.rrfMerger = new RRFMerger();
+        this.reranker = new Reranker();
+    }
+
+    /**
+     * Initialize the retriever by loading and indexing all documents.
+     */
+    public synchronized void initialize() {
+        if (initialized)
+            return;
+
+        // System.out.println("[HybridRetriever] Initializing...");
+        long startTime = System.currentTimeMillis();
+
+        // Load and chunk all documents
+        List<Chunk> chunks = chunker.loadAllChunks();
+        // System.out.println("[HybridRetriever] Loaded " + chunks.size() + " chunks");
+
+        // Index in BM25
+        bm25Index.addChunks(chunks);
+        // System.out.println("[HybridRetriever] BM25 index: " +
+        // bm25Index.getDocumentCount() + " docs");
+
+        // Create embeddings and add to vector store
+        embeddingService.initialize();
+        for (Chunk chunk : chunks) {
+            float[] embedding = embeddingService.embed(chunk.content(), false);
+            vectorStore.addChunk(chunk, embedding);
+        }
+        // System.out.println("[HybridRetriever] Vector store: " + vectorStore.size() +
+        // " vectors");
+
+        initialized = true;
+        long duration = System.currentTimeMillis() - startTime;
+        System.out.println("[HybridRetriever] Ready (took " + duration + "ms)");
+    }
+
+    /**
+     * Retrieve relevant chunks for a query.
+     * 
+     * @param query The search query
+     * @param topK  Number of results to return
+     * @return List of relevant chunks with scores
+     */
+    public List<ScoredChunk> retrieve(String query, int topK) {
+        return retrieve(query, topK, null);
+    }
+
+    /**
+     * Retrieve relevant chunks with optional source filter.
+     * 
+     * @param query        The search query
+     * @param topK         Number of results to return
+     * @param sourceFilter Optional source file filter (e.g., "billing_policy.md")
+     * @return List of relevant chunks with scores
+     */
+    public List<ScoredChunk> retrieve(String query, int topK, String sourceFilter) {
+        if (!initialized)
+            initialize();
+
+        // System.out.println("\n[HybridRetriever] Processing query: \"" + query + "\"
+        // (Filter: " + sourceFilter + ")");
+
+        // 1. BM25 search
+        List<ScoredChunk> bm25Results = sourceFilter != null
+                ? bm25Index.search(query, BM25_TOP_K, sourceFilter)
+                : bm25Index.search(query, BM25_TOP_K);
+        // System.out.println("[HybridRetriever] BM25 found " + bm25Results.size() + "
+        // results");
+        // if (!bm25Results.isEmpty()) {
+        // System.out.println(" Top BM25: " + bm25Results.get(0).source() + " (Score: "
+        // + String.format("%.2f", bm25Results.get(0).score()) + ")");
+        // }
+
+        // 2. Vector search
+        // System.out.println("[HybridRetriever] Generating query embedding...");
+        float[] queryEmbedding = embeddingService.embed(query, true);
+        List<ScoredChunk> vectorResults = sourceFilter != null
+                ? vectorStore.search(queryEmbedding, VECTOR_TOP_K, sourceFilter)
+                : vectorStore.search(queryEmbedding, VECTOR_TOP_K);
+        // System.out.println("[HybridRetriever] Vector search found " +
+        // vectorResults.size() + " results");
+        // if (!vectorResults.isEmpty()) {
+        // System.out.println(" Top Vector: " + vectorResults.get(0).source() + "
+        // (Score: "
+        // + String.format("%.4f", vectorResults.get(0).score()) + ")");
+        // }
+
+        // 3. RRF fusion
+        List<ScoredChunk> merged = rrfMerger.merge(bm25Results, vectorResults, RRF_TOP_K);
+        // System.out.println("[HybridRetriever] RRF Fusion produced " + merged.size() +
+        // " candidates");
+
+        // 4. Rerank
+        List<ScoredChunk> reranked = reranker.rerank(query, merged, Math.min(topK, FINAL_TOP_K));
+
+        // System.out.println("[HybridRetriever] Final Top " + reranked.size() + "
+        // results:");
+        // for (int i = 0; i < reranked.size(); i++) {
+        // ScoredChunk c = reranked.get(i);
+        // String snippet = c.content().length() > 100 ? c.content().substring(0,
+        // 100).replace("\n", " ") + "..."
+        // : c.content().replace("\n", " ");
+        // System.out.println(" " + (i + 1) + ". [" + c.source() + "] (Score: " +
+        // String.format("%.4f", c.score())
+        // + ") " + snippet);
+        // }
+
+        return reranked;
+    }
+
+    /**
+     * Get retrieval statistics for debugging.
+     */
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("bm25_docs", bm25Index.getDocumentCount());
+        stats.put("vector_count", vectorStore.size());
+        stats.put("initialized", initialized);
+        return stats;
+    }
+
+    /**
+     * Close all resources.
+     */
+    public void close() {
+        bm25Index.close();
+        embeddingService.close();
+    }
+}

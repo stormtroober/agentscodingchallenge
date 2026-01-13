@@ -87,10 +87,19 @@ public class AgentRefinerTestEN {
         // Check if a specific test ID is requested via system property
         String filterTestId = System.getProperty("test.id.en");
         String filterTestIdIt = System.getProperty("test.id");
+        String filterTestIdItExplicit = System.getProperty("test.id.it");
+        String filterRag = System.getProperty("test.rag");
+
+        // If RAG filter is active, skip all agent tests
+        if (filterRag != null && !filterRag.equals("null") && !filterRag.isEmpty()) {
+            System.out.println(">>> [EN] Skipping English tests (RAG filter active)");
+            return dynamicTests;
+        }
 
         // If Italian filter is set (property exists), skip English tests entirely
         // Note: empty string means "run all Italian tests", still skip English
-        boolean italianFilterActive = filterTestIdIt != null && !filterTestIdIt.equals("null");
+        boolean italianFilterActive = (filterTestIdIt != null && !filterTestIdIt.equals("null")) ||
+                (filterTestIdItExplicit != null && !filterTestIdItExplicit.equals("null"));
         if (italianFilterActive) {
             System.out.println(">>> [EN] Skipping English tests (Italian filter active)");
             return dynamicTests;

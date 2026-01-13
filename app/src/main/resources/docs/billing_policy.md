@@ -47,7 +47,7 @@
 - Add-on features used during the billing period
 - Enterprise custom development work
 
-## Processing Times
+## Payment Methods
 
 ### Accepted Payment Methods
 We accept the following payment methods for all plans:

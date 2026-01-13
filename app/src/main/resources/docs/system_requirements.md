@@ -1,8 +1,9 @@
 # System Requirements
 
-## Minimum Requirements
+## SDK and Library Requirements
 
-### For SDK/Library Usage
+### Java & Node.js & Python
+
 
 **Java:**
 - Java 11 or higher (Java 17+ recommended)
@@ -19,7 +20,7 @@
 - pip 21.0+
 - 128 MB available RAM
 
-### For Self-Hosted Deployments
+## Self-Hosted Deployment Requirements
 
 **Server Requirements:**
 - CPU: 2 cores minimum (4+ recommended)

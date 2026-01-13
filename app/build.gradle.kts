@@ -31,6 +31,21 @@ dependencies {
     
     // Google Gen AI SDK
     implementation("com.google.genai:google-genai:1.34.0")
+    
+    // === RAG Pipeline Dependencies ===
+    
+    // Apache Lucene for BM25 search
+    implementation("org.apache.lucene:lucene-core:9.9.1")
+    implementation("org.apache.lucene:lucene-analysis-common:9.9.1")
+    implementation("org.apache.lucene:lucene-queryparser:9.9.1")
+    
+    // DJL (Deep Java Library) for ML inference
+    implementation("ai.djl:api:0.29.0")
+    implementation("ai.djl.pytorch:pytorch-engine:0.29.0")
+    implementation("ai.djl.huggingface:tokenizers:0.29.0")
+    
+    // Logging
+    implementation("org.slf4j:slf4j-simple:2.0.9")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -64,6 +79,10 @@ tasks.named<Test>("test") {
     // Usage: ./gradlew :app:test -Dtest.id.en=1.1
     // Only pass if explicitly set
     System.getProperty("test.id.en")?.let { systemProperty("test.id.en", it) }
+
+    // Forward test.id.it system property for filtering Italian tests explicitly
+    // Usage: ./gradlew :app:test -Dtest.id.it=1.1
+    System.getProperty("test.id.it")?.let { systemProperty("test.id.it", it) }
 }
 
 
