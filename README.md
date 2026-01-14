@@ -184,7 +184,7 @@ The system implements a **Hybrid Retrieval-Augmented Generation** pipeline that 
 | **DocumentChunker** | Custom | Splits Markdown documents by `##` headers with overlap for context preservation |
 | **BM25Index** | Apache Lucene | Lexical search using BM25 ranking algorithm for keyword matching |
 | **VectorStore** | In-memory + DJL | Semantic search using dense embeddings with cosine similarity |
-| **EmbeddingService** | DJL (Deep Java Library) | Generates embeddings using `nomic-embed-text-v2-moe` model |
+| **EmbeddingService** | DJL (Deep Java Library) | Generates embeddings using `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` model |
 | **RRFMerger** | Custom | Reciprocal Rank Fusion to combine BM25 and vector search results |
 | **Reranker** | Custom | Final reranking and top-K selection |
 
