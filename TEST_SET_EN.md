@@ -228,14 +228,14 @@ How do I install the Python SDK?
 ```
 I want a refund
 ```
-**Expected:** Routed to BILLING agent
+**Expected:** BILLING agent handles the request (asks for details or provides refund assistance)
 
 #### TEST 3.2 - Route to Technical
 **Input:**
 ```
 I get error 500 from API
 ```
-**Expected:** Routed to TECHNICAL agent
+**Expected:** TECHNICAL agent handles the request (provides troubleshooting help for 500 errors)
 
 #### TEST 3.3 - Switch mid-conversation
 **Turn 1 Input:**
