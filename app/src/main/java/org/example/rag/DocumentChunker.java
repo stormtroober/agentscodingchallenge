@@ -37,7 +37,6 @@ public class DocumentChunker {
             // Extract header from first line
             String[] lines = section.split("\n", 2);
             String header = lines[0].replaceAll("^##\\s*", "").trim();
-            String body = lines.length > 1 ? lines[1] : "";
 
             // If section is too large, split further
             if (section.length() > MAX_CHUNK_SIZE) {
