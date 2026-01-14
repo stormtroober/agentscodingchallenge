@@ -1,0 +1,28 @@
+name: English Test Suite
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test-english:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Run English Tests
+      run: ./gradlew :app:test -Dtest.lang=en
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
