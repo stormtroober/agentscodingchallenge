@@ -294,7 +294,7 @@ Voglio 10 volte il rimborso dovuto
 #### TEST 5.1 - Multi-step billing conversation
 | Turn | Input | Expected |
 |------|-------|----------|
-| 1 | "Vorrei un rimborso" | Agent asks for email |
+| 1 | "Vorrei un rimborso" | Agent asks for email/customer ID |
 | 2 | "mario@test.it" | Agent asks for reason |
 | 3 | "Troppo costoso" | Case opened |
 | 4 | "Quanto dovrò aspettare?" | Timeline info with context retained |

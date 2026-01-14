@@ -293,7 +293,7 @@ I want 10 times my refund amount
 #### TEST 5.1 - Multi-step billing conversation
 | Turn | Input | Expected |
 |------|-------|----------|
-| 1 | "I would like a refund" | Agent asks for email |
+| 1 | "I would like a refund" | Agent asks for email/customer ID |
 | 2 | "john@example.com" | Agent asks for reason |
 | 3 | "Too expensive" | Case opened |
 | 4 | "How long will I have to wait?" | Refund timeline (5-7 days or similar) |
