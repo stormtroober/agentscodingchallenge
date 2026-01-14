@@ -1,5 +1,6 @@
 package org.example.llm;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import com.google.genai.Client;
 import com.google.genai.types.*;
 import org.example.model.ConversationMessage;
@@ -16,9 +17,7 @@ import java.util.stream.Collectors;
  * Gemini API client implementation using the official Google Gen AI SDK.
  */
 public class GeminiClient implements LLMClient {
-    // Attempting to use the model the user suggested or a standard one
-    private static final String MODEL_NAME = "gemini-2.0-flash";
-
+    private final String modelName;
     private final Client client;
 
     public GeminiClient(String apiKey) {
@@ -26,6 +25,17 @@ public class GeminiClient implements LLMClient {
             throw new IllegalArgumentException("API Key cannot be null or empty");
         }
         this.client = Client.builder().apiKey(apiKey).build();
+
+        // Load model name from .env
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        String envModel = dotenv.get("GEMINI_MODEL");
+        if (envModel == null) {
+            // Try parent directory
+            Dotenv parentDotenv = Dotenv.configure().directory("..").ignoreIfMissing().load();
+            envModel = parentDotenv.get("GEMINI_MODEL");
+        }
+
+        this.modelName = (envModel != null && !envModel.isEmpty()) ? envModel : "gemini-2.0-flash";
     }
 
     @Override
@@ -80,7 +90,7 @@ public class GeminiClient implements LLMClient {
 
             // Execute request
             GenerateContentResponse response = client.models.generateContent(
-                    MODEL_NAME,
+                    modelName,
                     history,
                     configBuilder.build());
 
@@ -89,7 +99,7 @@ public class GeminiClient implements LLMClient {
         } catch (Exception e) {
             e.printStackTrace();
             // If the default model fails, maybe try another fallback or just report error
-            throw new RuntimeException("Failed to call Gemini API via SDK (" + MODEL_NAME + ")", e);
+            throw new RuntimeException("Failed to call Gemini API via SDK (" + modelName + ")", e);
         }
     }
 
