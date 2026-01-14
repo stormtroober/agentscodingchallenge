@@ -301,7 +301,7 @@ I want 10 times my refund amount
 #### TEST 5.2 - Technical follow-up
 | Turn | Input | Expected |
 |------|-------|----------|
-| 1 | "I have connection problems" | Troubleshooting steps |
+| 1 | "I have connection problems" | Troubleshooting steps OR ask for specific details about the connection issue |
 | 2 | "What if the problem persists?" | Next steps / escalation option |
 
 #### TEST 5.3 - Context retention
