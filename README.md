@@ -33,3 +33,19 @@ Run the application using Gradle:
 - **Technical**: Ask about connection timeouts, API integration, or system requirements.
 - **Billing**: Ask for a refund, check your plan, or ask about billing policies.
 - **Control**: Type `clear` to reset context or `quit` to exit.
+
+## Testing
+### All agent tests (IT + EN)
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest"
+### Italian tests only
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=it
+### English tests only
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=en
+### Chapter 4 only (all languages)
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.chapter=4
+### Chapter 4 Italian only
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=it -Dtest.chapter=4
+### Specific single test (e.g., 1.1)
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.id=1.1
+### Specific single test in a language
+./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=en -Dtest.id=1.1
