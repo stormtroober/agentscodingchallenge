@@ -7,8 +7,7 @@ import ai.djl.inference.Predictor;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
-import ai.djl.ndarray.types.DataType;
-import ai.djl.ndarray.types.Shape;
+
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ModelNotFoundException;
 import ai.djl.repository.zoo.ZooModel;
@@ -18,8 +17,10 @@ import ai.djl.translate.TranslatorContext;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Embedding service using DJL for nomic-embed-text-v2-moe or fallback models.
@@ -76,7 +77,7 @@ public class EmbeddingService implements AutoCloseable {
             }
 
             initialized = true;
-            System.out.println("[EmbeddingService] Model loaded successfully");
+            // System.out.println("[EmbeddingService] Model loaded successfully");
 
         } catch (Exception e) {
             System.err.println("[EmbeddingService] Failed to load model: " + e.getMessage());

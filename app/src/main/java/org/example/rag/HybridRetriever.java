@@ -46,7 +46,7 @@ public class HybridRetriever {
             return;
 
         // System.out.println("[HybridRetriever] Initializing...");
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
 
         // Load and chunk all documents
         List<Chunk> chunks = chunker.loadAllChunks();
@@ -67,8 +67,8 @@ public class HybridRetriever {
         // " vectors");
 
         initialized = true;
-        long duration = System.currentTimeMillis() - startTime;
-        System.out.println("[HybridRetriever] Ready (took " + duration + "ms)");
+        // long duration = System.currentTimeMillis() - startTime;
+        // System.out.println("[HybridRetriever] Ready (took " + duration + "ms)");
     }
 
     /**
