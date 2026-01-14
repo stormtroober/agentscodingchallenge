@@ -45,6 +45,9 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
  * Only English tests:
  * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=en
  * 
+ * Only Polish tests:
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=pl
+ * 
  * Specific chapter (e.g., 4.x):
  * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest"
  * -Dtest.chapter=4
@@ -66,7 +69,8 @@ public class MultiAgentSystemTest {
 
     private static final Map<String, String> TEST_SET_PATHS = Map.of(
             "it", "../TEST_SET_IT.md",
-            "en", "../TEST_SET_EN.md");
+            "en", "../TEST_SET_EN.md",
+            "pl", "../TEST_SET_PL.md");
 
     private LLMClient llmClient;
     private CoordinatorAgent agent;
@@ -206,9 +210,20 @@ public class MultiAgentSystemTest {
     private VerificationResult verifyWithJudge(TestCase testCase, Turn turn, String actualResponse, String lang) {
         String systemInstruction = "You are an impartial Judge for an AI Agent testing system. Evaluate if the agent output satisfies the expected behavior.";
 
-        String languageNote = lang.equals("en")
-                ? "- The response should be in English since input was in English."
-                : "- If the expected says \"2-3 business days\" and the response says \"2-3 giorni lavorativi\" (Italian), that's a PASS.";
+        String languageNote;
+        switch (lang) {
+            case "en":
+                languageNote = "- The response should be in English since input was in English.";
+                break;
+            case "it":
+                languageNote = "- If the expected says \"2-3 business days\" and the response says \"2-3 giorni lavorativi\" (Italian), that's a PASS.";
+                break;
+            case "pl":
+                languageNote = "- If the expected says \"2-3 business days\" and the response says \"2-3 dni roboczych\" (Polish), that's a PASS.";
+                break;
+            default:
+                languageNote = "- Accept semantically equivalent responses in any language.";
+        }
 
         String userContent = String.format(
                 """
