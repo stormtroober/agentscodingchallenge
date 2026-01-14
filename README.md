@@ -66,6 +66,8 @@ The system follows a Coordinator/Dispatcher pattern where the Coordinator Agent 
 - Answers questions based strictly on local documentation
 - Uses hybrid RAG pipeline for accurate retrieval
 - Covers: troubleshooting, API integration, system requirements, installation
+- Available tools:
+  - `search_documentation`: Searches technical documentation using hybrid semantic + keyword search (RAG pipeline)
 
 ### Billing Specialist Agent
 - Tool-calling capabilities for actions and queries
@@ -129,7 +131,7 @@ agentscodingchallenge/
 
 ## RAG Pipeline
 
-The system implements a sophisticated **Hybrid Retrieval-Augmented Generation** pipeline that combines lexical and semantic search for optimal document retrieval.
+The system implements a **Hybrid Retrieval-Augmented Generation** pipeline that combines lexical and semantic search for optimal document retrieval.
 
 ### Pipeline Components
 
@@ -369,7 +371,7 @@ and explains the 7 business day deadline. All expected elements are present.
 The LLM Judge follows these principles:
 
 - **Semantic Correctness**: Focus on meaning, not exact wording
-- **Multilingual Equivalence**: "2-3 business days" = "2-3 giorni lavorativi" (Italian)
+- **Multilingual Equivalence**: Treat translated terms as semantically identical across languages
 - **Tool Inference**: If response contains correct info, assume tool was called
 - **Additional Details**: Extra helpful information is acceptable
 - **Failure Criteria**: Only fail if key expected information is missing or incorrect
