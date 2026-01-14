@@ -208,6 +208,45 @@ The system implements a **Hybrid Retrieval-Augmented Generation** pipeline that 
 | MAX_CHUNK_SIZE | 1000 chars | Maximum chunk size |
 | OVERLAP_SIZE | 100 chars | Overlap between chunks |
 
+### Hallucination Prevention
+
+The system implements a **Confidence Threshold** mechanism to reduce the risk of AI hallucinations:
+
+```
+CONFIDENCE_THRESHOLD = 0.015
+```
+
+**How it works:**
+
+1. Each retrieved chunk has a relevance score from the RRF algorithm
+2. Results with score >= 0.015 are marked as "HIGH" confidence
+3. Results below the threshold are marked as "LOW" confidence
+4. If ALL results are below the threshold, a warning is injected:
+
+```
+WARNING: LOW CONFIDENCE RESULTS
+The following results have low relevance scores. 
+The documentation may not directly address this query. 
+Consider asking for clarification or admitting uncertainty.
+```
+
+**Threshold Rationale:**
+
+The RRF formula is `score = 1/(k + rank)` where k=60. A chunk appearing in:
+- Top position in both BM25 and Vector search: ~0.033
+- Top-10 in one search only: ~0.014-0.016
+
+The threshold of 0.015 ensures results are at least moderately relevant in at least one retrieval method.
+
+**Additional Anti-Hallucination Measures:**
+
+| Strategy | Implementation |
+|----------|----------------|
+| Grounding via RAG | Technical agent uses only retrieved documentation |
+| Tool-based responses | Billing agent relies on structured tool outputs |
+| Explicit uncertainty | Agents admit when documentation does not cover a topic |
+| Restrictive prompts | System prompts forbid inventing information |
+
 ---
 
 ## Setup
