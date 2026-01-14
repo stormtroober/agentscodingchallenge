@@ -31,6 +31,8 @@ public class TechnicalSpecialistAgent implements Agent {
             - Search first, even for general problems
             - Provide step-by-step instructions when applicable
             - Give helpful information BEFORE asking for more details
+            - If the tool returns "No relevant documentation found", explicitly state that the documentation does not cover the topic and offer to escalate to a human agent.
+            - Do NOT provide general knowledge answers if the documentation search fails.
             """;
 
     private final LLMClient llmClient;

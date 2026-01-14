@@ -104,21 +104,24 @@ public class DocumentRetrievalTool implements Tool {
         // Check if we have any high-confidence results
         boolean lowConfidenceWarning = highConfidenceResults.isEmpty();
 
-        // If no high-confidence results, use top results but warn
-        List<ScoredChunk> finalResults = lowConfidenceWarning
-                ? results.stream().limit(3).toList()
-                : highConfidenceResults;
+        // If no high-confidence results, return "No relevant documentation found"
+        if (lowConfidenceWarning) {
+            return "No relevant documentation found for query: \"" + query + "\"\n" +
+                    "(All results were below confidence threshold)\n\n" +
+                    "Available documentation covers:\n" +
+                    "- Troubleshooting (connection issues, authentication, performance)\n" +
+                    "- API Integration (authentication, endpoints, webhooks)\n" +
+                    "- System Requirements (SDK, self-hosted, browsers)\n" +
+                    "- Installation (Linux, Windows, macOS, SDKs)\n" +
+                    "- FAQ (general questions, account management, API & security)";
+        }
+
+        List<ScoredChunk> finalResults = highConfidenceResults;
 
         // Format results
         StringBuilder output = new StringBuilder();
 
         // Add low-confidence warning if applicable
-        if (lowConfidenceWarning) {
-            output.append("WARNING: LOW CONFIDENCE RESULTS\n");
-            output.append("The following results have low relevance scores. ");
-            output.append("The documentation may not directly address this query. ");
-            output.append("Consider asking for clarification or admitting uncertainty.\n\n");
-        }
 
         output.append("Documentation Search Results (showing top ").append(finalResults.size())
                 .append(" matches)\n\n");
