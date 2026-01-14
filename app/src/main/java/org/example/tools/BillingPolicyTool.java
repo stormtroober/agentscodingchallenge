@@ -25,8 +25,14 @@ public class BillingPolicyTool implements Tool {
 
     @Override
     public String getDescription() {
-        return "Search the billing policy document for information about plans, pricing, refunds, " +
-                "cancellation, payment methods, and billing procedures. Uses semantic search.";
+        return "Search the billing policy document. Available sections: " +
+                "1) Subscription Plans (Basic $9.99, Professional $29.99, Enterprise $99.99 with features), " +
+                "2) Billing Cycle (monthly/annual options), " +
+                "3) Refund Policy (full/partial eligibility), " +
+                "4) Payment Methods (cards, PayPal, bank transfer), " +
+                "5) Cancellation process, " +
+                "6) Disputes, Payment Failures, Taxes. " +
+                "Use semantic search with relevant keywords.";
     }
 
     @Override

@@ -15,7 +15,10 @@ public class OpenRefundCaseTool implements Tool {
 
     @Override
     public String getDescription() {
-        return "Opens a new support case for a refund request. Assigns a case ID and sends the customer a refund form to complete.";
+        return "Opens a refund support case for customers requesting an ACTUAL refund (not just info). " +
+                "REQUIRES BOTH: customer_id (email) AND reason - both must be EXPLICITLY provided by user. " +
+                "Do NOT infer or make up the reason - if user hasn't stated a reason, ASK for it first. " +
+                "Do NOT use for policy questions. Returns case ID and form link for customer.";
     }
 
     @Override

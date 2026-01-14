@@ -14,7 +14,13 @@ public class RefundTimelineTool implements Tool {
 
     @Override
     public String getDescription() {
-        return "Provides refund processing timelines and eligibility information based on the refund type and customer's billing situation.";
+        return "Get refund processing timelines and eligibility. " +
+                "Use for: timeline questions, refund policy inquiries, plan-specific processing times. " +
+                "Semantic mappings: 'downgrade/switch plans' → refund_type='prorated', " +
+                "'cancel subscription' → refund_type='cancellation', " +
+                "'full refund' OR 'after refund request' → refund_type='full'. " +
+                "Parameters are OPTIONAL - if user just asks 'how long?' after requesting refund, " +
+                "call with refund_type='full' (default). NO email needed - this is for POLICY info.";
     }
 
     @Override
