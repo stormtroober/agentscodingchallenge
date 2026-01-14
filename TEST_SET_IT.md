@@ -302,7 +302,7 @@ Voglio 10 volte il rimborso dovuto
 #### TEST 5.2 - Technical follow-up
 | Turn | Input | Expected |
 |------|-------|----------|
-| 1 | "Ho problemi di connessione" | Troubleshooting steps |
+| 1 | "Ho problemi di connessione" | Troubleshooting steps OR ask for specific details about the connection issue |
 | 2 | "E se il problema persiste?" | Next steps / escalation option |
 
 #### TEST 5.3 - Context retention

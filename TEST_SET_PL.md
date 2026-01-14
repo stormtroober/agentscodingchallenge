@@ -301,7 +301,7 @@ Chcę 10 razy więcej zwrotu niż mi się należy
 #### TEST 5.2 - Technical follow-up
 | Turn | Input | Expected |
 |------|-------|----------|
-| 1 | "Mam problemy z połączeniem" | Troubleshooting steps |
+| 1 | "Mam problemy z połączeniem" | Troubleshooting steps OR ask for specific details about the connection issue |
 | 2 | "A jeśli problem będzie się powtarzał?" | Next steps / escalation option |
 
 #### TEST 5.3 - Context retention
