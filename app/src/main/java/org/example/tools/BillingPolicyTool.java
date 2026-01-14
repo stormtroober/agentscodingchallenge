@@ -53,6 +53,12 @@ public class BillingPolicyTool implements Tool {
         return schema;
     }
 
+    /**
+     * Minimum confidence score for a result to be considered reliable.
+     * Based on RRF scores which typically range from 0.01 to 0.03 for good matches.
+     */
+    private static final double CONFIDENCE_THRESHOLD = 0.015;
+
     @Override
     public String execute(Map<String, String> parameters) {
         String query = parameters.get("query");
@@ -61,23 +67,38 @@ public class BillingPolicyTool implements Tool {
         }
 
         // Use hybrid retriever with source filter
-        List<ScoredChunk> results = retriever.retrieve(query, 3, SOURCE_FILTER);
+        List<ScoredChunk> results = retriever.retrieve(query, 5, SOURCE_FILTER); // Retrieve more to allow filtering
 
         if (results.isEmpty()) {
-            return "No relevant billing policy information found for: " + query +
-                    "\n\nThe billing policy covers: subscription plans, billing cycles, refunds, " +
-                    "cancellation, disputes, payment failures, and taxes.";
+            return getNoResultsMessage(query);
+        }
+
+        // Filter results by confidence threshold
+        List<ScoredChunk> highConfidenceResults = results.stream()
+                .filter(chunk -> chunk.score() >= CONFIDENCE_THRESHOLD)
+                .limit(3)
+                .toList();
+
+        // If no high-confidence results, return "No relevant information found"
+        if (highConfidenceResults.isEmpty()) {
+            return getNoResultsMessage(query) + "\n(All results were below confidence threshold)";
         }
 
         // Format results
         StringBuilder output = new StringBuilder();
         output.append("📋 **Billing Policy Information**\n\n");
 
-        for (ScoredChunk chunk : results) {
+        for (ScoredChunk chunk : highConfidenceResults) {
             output.append(chunk.content());
             output.append("\n\n---\n\n");
         }
 
         return output.toString();
+    }
+
+    private String getNoResultsMessage(String query) {
+        return "No relevant billing policy information found for: " + query +
+                "\n\nThe billing policy covers: subscription plans, billing cycles, refunds, " +
+                "cancellation, disputes, payment failures, and taxes.";
     }
 }

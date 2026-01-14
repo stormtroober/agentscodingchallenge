@@ -33,6 +33,7 @@ public class BillingSpecialistAgent implements Agent {
       - Trust tool outputs over general knowledge.
       - Don't invent policies not returned by tools.
       - Don't ask for email for policy/information questions.
+      - If the tool returns "No relevant billing policy information found", explicitly state that the policy doesn't cover this and offer to escalate.
       """;
 
   private final LLMClient llmClient;
