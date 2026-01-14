@@ -65,23 +65,30 @@ tasks.named<JavaExec>("run") {
 }
 
 tasks.named<Test>("test") {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        // Include/exclude tests by tag
+        System.getProperty("includeTags")?.let { includeTags(it) }
+        System.getProperty("excludeTags")?.let { excludeTags(it) }
+    }
     testLogging {
         showStandardStreams = true
         events("passed", "skipped", "failed")
     }
-    // Forward test.id system property for filtering individual tests (Italian)
+    
+    // Forward language filter
+    // Usage: ./gradlew :app:test -Dtest.lang=it (or en)
+    System.getProperty("test.lang")?.let { systemProperty("test.lang", it) }
+    
+    // Forward chapter filter
+    // Usage: ./gradlew :app:test -Dtest.chapter=4
+    System.getProperty("test.chapter")?.let { systemProperty("test.chapter", it) }
+    
+    // Forward test ID filter (for backward compatibility and single test)
     // Usage: ./gradlew :app:test -Dtest.id=1.1
-    // Only pass if explicitly set
     System.getProperty("test.id")?.let { systemProperty("test.id", it) }
     
-    // Forward test.id.en system property for filtering English tests
-    // Usage: ./gradlew :app:test -Dtest.id.en=1.1
-    // Only pass if explicitly set
+    // Legacy filters (for backward compatibility during transition)
     System.getProperty("test.id.en")?.let { systemProperty("test.id.en", it) }
-
-    // Forward test.id.it system property for filtering Italian tests explicitly
-    // Usage: ./gradlew :app:test -Dtest.id.it=1.1
     System.getProperty("test.id.it")?.let { systemProperty("test.id.it", it) }
 }
 

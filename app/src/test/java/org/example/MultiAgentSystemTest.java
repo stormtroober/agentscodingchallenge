@@ -8,6 +8,7 @@ import org.example.model.ConversationContext;
 import org.example.model.ConversationMessage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestInstance;
 
@@ -17,20 +18,59 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+/**
+ * Multi-Agent System Test - Unified Multilingual Test Runner
+ * 
+ * Loads and runs test cases from all language-specific test sets.
+ * Uses JUnit 5 Tags for filtering by language and dynamic filtering for
+ * chapters/IDs.
+ * 
+ * Usage Examples:
+ * 
+ * All agent tests (all languages):
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest"
+ * 
+ * Only Italian tests:
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=it
+ * 
+ * Only English tests:
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=en
+ * 
+ * Specific chapter (e.g., 4.x):
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest"
+ * -Dtest.chapter=4
+ * 
+ * Specific chapter in a specific language:
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=it
+ * -Dtest.chapter=4
+ * 
+ * Single test by ID:
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.id=1.1
+ * 
+ * Single test by ID and language:
+ * ./gradlew :app:test --tests "org.example.MultiAgentSystemTest" -Dtest.lang=en
+ * -Dtest.id=1.1
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AgentRefinerTest {
+@Tag("agent")
+public class MultiAgentSystemTest {
 
-    private static final String TEST_SET_PATH = "../TEST_SET.md";
+    private static final Map<String, String> TEST_SET_PATHS = Map.of(
+            "it", "../TEST_SET.md",
+            "en", "../TEST_SET_EN.md");
+
     private LLMClient llmClient;
     private CoordinatorAgent agent;
-    private List<TestCase> testCases;
+    private Map<String, List<TestCase>> testCasesByLanguage;
 
     @BeforeAll
     public void setup() throws IOException {
@@ -38,7 +78,6 @@ public class AgentRefinerTest {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         String apiKey = dotenv.get("GEMINI_API_KEY");
         if (apiKey == null || apiKey.isEmpty()) {
-            // Try looking in parent directory
             dotenv = Dotenv.configure().directory("..").ignoreIfMissing().load();
             apiKey = dotenv.get("GEMINI_API_KEY");
         }
@@ -53,7 +92,20 @@ public class AgentRefinerTest {
 
         llmClient = new GeminiClient(apiKey);
         agent = new CoordinatorAgent(llmClient);
-        testCases = parseTestCases(Paths.get(TEST_SET_PATH));
+
+        // Load all test sets
+        testCasesByLanguage = new HashMap<>();
+        for (Map.Entry<String, String> entry : TEST_SET_PATHS.entrySet()) {
+            String lang = entry.getKey();
+            Path path = Paths.get(entry.getValue());
+            if (Files.exists(path)) {
+                testCasesByLanguage.put(lang, parseTestCases(path));
+                System.out.println(">>> Loaded " + testCasesByLanguage.get(lang).size() + " test cases for language: "
+                        + lang.toUpperCase());
+            } else {
+                System.out.println(">>> WARNING: Test set not found for language " + lang + ": " + path);
+            }
+        }
     }
 
     @org.junit.jupiter.api.AfterAll
@@ -62,71 +114,68 @@ public class AgentRefinerTest {
     }
 
     /**
-     * Generates individual test cases from TEST_SET.md.
-     * 
-     * Run all tests:
-     * ./gradlew :app:test --tests "org.example.AgentRefinerTest"
-     * 
-     * Run a specific test by ID:
-     * ./gradlew :app:test --tests "org.example.AgentRefinerTest" -Dtest.id=1.1
-     * ./gradlew :app:test --tests "org.example.AgentRefinerTest" -Dtest.id=2.3
+     * Generates individual test cases from all language test sets.
+     * Filtering is controlled via system properties:
+     * - test.lang: Filter by language (it, en)
+     * - test.chapter: Filter by chapter prefix (1, 2, 3, 4, 5)
+     * - test.id: Filter by exact test ID (1.1, 2.3, etc.)
      */
     @TestFactory
     public Collection<DynamicTest> generateTests() {
         List<DynamicTest> dynamicTests = new ArrayList<>();
 
-        // Check if a specific test ID is requested via system property
+        // Get filter properties
+        String filterLang = System.getProperty("test.lang");
+        String filterChapter = System.getProperty("test.chapter");
         String filterTestId = System.getProperty("test.id");
-        String filterTestIdIt = System.getProperty("test.id.it");
-        if (filterTestIdIt != null) {
-            filterTestId = filterTestIdIt;
-        }
-        String filterTestIdEn = System.getProperty("test.id.en");
-        String filterRag = System.getProperty("test.rag");
 
-        // If RAG filter is active, skip all agent tests
-        if (filterRag != null && !filterRag.equals("null") && !filterRag.isEmpty()) {
-            System.out.println(">>> [IT] Skipping Italian tests (RAG filter active)");
-            return dynamicTests;
-        }
+        System.out.println(">>> Filter: lang=" + filterLang + ", chapter=" + filterChapter + ", id=" + filterTestId);
 
-        // If English filter is set (property exists), skip Italian tests entirely
-        // Note: empty string means "run all English tests", still skip Italian
-        boolean englishFilterActive = filterTestIdEn != null && !filterTestIdEn.equals("null");
-        if (englishFilterActive) {
-            System.out.println(">>> [IT] Skipping Italian tests (English filter active)");
-            return dynamicTests;
-        }
+        for (Map.Entry<String, List<TestCase>> langEntry : testCasesByLanguage.entrySet()) {
+            String lang = langEntry.getKey();
+            List<TestCase> testCases = langEntry.getValue();
 
-        // Debug: show how many test cases were parsed
-        System.out.println(">>> [IT] Parsed " + testCases.size() + " test cases from TEST_SET.md");
-        System.out.println(">>> [IT] Filter test.id = " + filterTestId);
-
-        for (TestCase testCase : testCases) {
-            // Skip if filter is set (not null, not "null" string, not empty) and doesn't
-            // match
-            boolean hasFilter = filterTestId != null && !filterTestId.equals("null") && !filterTestId.isEmpty();
-            if (hasFilter) {
-                // Support both exact match (1.1) and chapter prefix (1 matches 1.1, 1.2, etc.)
-                boolean matches = testCase.id.equals(filterTestId) || testCase.id.startsWith(filterTestId + ".");
-                if (!matches) {
-                    continue;
-                }
+            // Apply language filter
+            if (isFilterSet(filterLang) && !filterLang.equalsIgnoreCase(lang)) {
+                System.out.println(">>> Skipping language " + lang.toUpperCase() + " (filter: " + filterLang + ")");
+                continue;
             }
 
-            // Create a test name like "[1.1] Refund request with complete data"
-            String testName = "[" + testCase.id + "] " + testCase.title;
+            for (TestCase testCase : testCases) {
+                // Apply chapter filter
+                if (isFilterSet(filterChapter)) {
+                    if (!testCase.id.startsWith(filterChapter + ".") && !testCase.id.equals(filterChapter)) {
+                        continue;
+                    }
+                }
 
-            dynamicTests.add(dynamicTest(testName, () -> runSingleTest(testCase)));
+                // Apply test ID filter
+                if (isFilterSet(filterTestId)) {
+                    boolean matches = testCase.id.equals(filterTestId) || testCase.id.startsWith(filterTestId + ".");
+                    if (!matches) {
+                        continue;
+                    }
+                }
+
+                // Create test name: [IT 1.1] Title or [EN 1.1] Title
+                String testName = "[" + lang.toUpperCase() + " " + testCase.id + "] " + testCase.title;
+                String testLang = lang; // capture for lambda
+
+                dynamicTests.add(dynamicTest(testName, () -> runSingleTest(testCase, testLang)));
+            }
         }
 
-        System.out.println(">>> [IT] Generated " + dynamicTests.size() + " dynamic tests");
-
+        System.out.println(">>> Generated " + dynamicTests.size() + " dynamic tests");
         return dynamicTests;
     }
 
-    private void runSingleTest(TestCase testCase) {
-        System.out.println(">>> STARTING TEST CASE: " + testCase.id + " - " + testCase.title);
+    private boolean isFilterSet(String filter) {
+        return filter != null && !filter.equals("null") && !filter.isEmpty();
+    }
+
+    private void runSingleTest(TestCase testCase, String lang) {
+        System.out.println(
+                ">>> [" + lang.toUpperCase() + "] STARTING TEST CASE: " + testCase.id + " - " + testCase.title);
         ConversationContext context = new ConversationContext();
 
         int turnIndex = 1;
@@ -141,7 +190,7 @@ public class AgentRefinerTest {
             System.out.println("   [Turn " + turnIndex + "] Expected: " + turn.expected);
 
             // Verify with LLM Judge
-            VerificationResult result = verifyWithJudge(testCase, turn, agentResponse);
+            VerificationResult result = verifyWithJudge(testCase, turn, agentResponse, lang);
 
             if (!result.passed) {
                 System.out.println("   [Turn " + turnIndex + "] ❌ FAILED verification: " + result.reason);
@@ -151,15 +200,20 @@ public class AgentRefinerTest {
             }
             turnIndex++;
         }
-        System.out.println(">>> TEST CASE " + testCase.id + " PASSED ✅");
+        System.out.println(">>> [" + lang.toUpperCase() + "] TEST CASE " + testCase.id + " PASSED ✅");
     }
 
-    private VerificationResult verifyWithJudge(TestCase testCase, Turn turn, String actualResponse) {
+    private VerificationResult verifyWithJudge(TestCase testCase, Turn turn, String actualResponse, String lang) {
         String systemInstruction = "You are an impartial Judge for an AI Agent testing system. Evaluate if the agent output satisfies the expected behavior.";
+
+        String languageNote = lang.equals("en")
+                ? "- The response should be in English since input was in English."
+                : "- If the expected says \"2-3 business days\" and the response says \"2-3 giorni lavorativi\" (Italian), that's a PASS.";
 
         String userContent = String.format(
                 """
                         Test Case: %s - %s
+                        Language: %s
                         User Input: %s
                         Expected Behavior/Response:
                         %s
@@ -172,7 +226,7 @@ public class AgentRefinerTest {
 
                         IMPORTANT GUIDELINES:
                         - Focus on SEMANTIC correctness, not exact wording.
-                        - If the expected says "2-3 business days" and the response says "2-3 giorni lavorativi" (Italian), that's a PASS.
+                        %s
                         - If the response contains the required information, even with additional helpful details, that's a PASS.
                         - Only FAIL if the response is missing the key expected information or provides incorrect information.
                         - Tool calls: If expected says "calls X tool" but response contains the correct info, assume tool was called (PASS).
@@ -181,10 +235,10 @@ public class AgentRefinerTest {
                         STATUS: [PASS or FAIL]
                         REASON: [Brief explanation]
                         """,
-                testCase.id, testCase.title, turn.input, turn.expected, actualResponse);
+                testCase.id, testCase.title, lang.toUpperCase(), turn.input, turn.expected, actualResponse,
+                languageNote);
 
         try {
-            // Pass the content as a USER message, not just header
             String judgeResponse = llmClient.chat(systemInstruction, List.of(ConversationMessage.user(userContent)));
             boolean passed = judgeResponse.contains("STATUS: PASS");
             String reason = "Unknown";
@@ -204,7 +258,6 @@ public class AgentRefinerTest {
         String content = Files.readString(path);
         List<TestCase> cases = new ArrayList<>();
 
-        // Regex to split by test headers (e.g., #### TEST 1.1)
         Pattern testHeaderPattern = Pattern.compile("#### TEST (\\d+\\.\\d+) - (.+)");
         String[] lines = content.split("\\R");
 
@@ -221,14 +274,8 @@ public class AgentRefinerTest {
             }
 
             if (currentCase != null) {
-                // Determine if it's a table based test or standard block
-                // For simplicity, we'll try to detect the "Input:" block or Table row
-
                 // Standard block detection
                 if (line.startsWith("**Input:**") || line.matches("\\*\\*Turn \\d+ Input:\\*\\*")) {
-                    // Parse standard blocks (handle multi-turn block format roughly if needed,
-                    // but specifically look for code blocks)
-                    // Look ahead for code block
                     StringBuilder inputBuilder = new StringBuilder();
                     int j = i + 1;
                     boolean inCodeBlock = false;
@@ -238,7 +285,7 @@ public class AgentRefinerTest {
                             if (inCodeBlock) {
                                 i = j;
                                 break;
-                            } // End of block
+                            }
                             inCodeBlock = true;
                         } else if (inCodeBlock) {
                             inputBuilder.append(l).append("\n");
@@ -247,18 +294,14 @@ public class AgentRefinerTest {
                     }
                     String input = inputBuilder.toString().trim();
 
-                    // Now look for expected
-                    // Scan forward for "**Expected"
                     String expected = "";
                     for (int k = i + 1; k < lines.length; k++) {
                         if (lines[k].trim().startsWith("#### TEST"))
-                            break; // Don't go to next test
+                            break;
                         if (lines[k].trim().startsWith("**Expected")) {
-                            // Check if expected is on the same line (e.g., **Expected:** text here)
                             String expLine = lines[k].trim();
                             int colonIdx = expLine.indexOf(":");
                             if (colonIdx != -1 && colonIdx < expLine.length() - 1) {
-                                // There's content after the colon on the same line
                                 String sameLineContent = expLine.substring(colonIdx + 1).replace("**", "").trim();
                                 if (!sameLineContent.isEmpty()) {
                                     expected = sameLineContent;
@@ -266,11 +309,9 @@ public class AgentRefinerTest {
                                 }
                             }
 
-                            // extract expected text until next test, next turn, section divider, or header
                             StringBuilder expBuilder = new StringBuilder();
                             for (int z = k + 1; z < lines.length; z++) {
                                 String zLine = lines[z].trim();
-                                // Stop conditions
                                 if (zLine.startsWith("#### TEST") ||
                                         zLine.startsWith("**Turn") ||
                                         zLine.startsWith("---") ||
@@ -292,9 +333,7 @@ public class AgentRefinerTest {
 
                 // Table detection (Category 5)
                 if (line.startsWith("|") && line.contains("Turn") && line.contains("Input")) {
-                    // Table header found, skip separator
                     i++;
-                    // Read rows
                     while (i + 1 < lines.length) {
                         String row = lines[++i].trim();
                         if (!row.startsWith("|"))
