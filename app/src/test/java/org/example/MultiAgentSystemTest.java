@@ -65,7 +65,7 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 public class MultiAgentSystemTest {
 
     private static final Map<String, String> TEST_SET_PATHS = Map.of(
-            "it", "../TEST_SET.md",
+            "it", "../TEST_SET_IT.md",
             "en", "../TEST_SET_EN.md");
 
     private LLMClient llmClient;
