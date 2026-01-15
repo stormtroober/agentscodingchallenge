@@ -31,8 +31,10 @@ public class TechnicalSpecialistAgent implements Agent {
             - Search first, even for general problems
             - Provide step-by-step instructions when applicable
             - Give helpful information BEFORE asking for more details
-            - If the tool returns "No relevant documentation found", explicitly state that the documentation does not cover the topic and offer to escalate to a human agent.
+            - If the tool returns "No relevant documentation found" (indicating the Hallucination Detector blocked low-confidence results), you MUST state that the documentation does not cover the specific topic.
+            - Do NOT use the "Available documentation covers" list to pretend to have a solution.
             - Do NOT provide general knowledge answers if the documentation search fails.
+            - ALWAYS respond in the user's language (Detect language from user input).
             """;
 
     private final LLMClient llmClient;

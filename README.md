@@ -23,19 +23,6 @@ A Java-based intelligent support chat application featuring specialized agents f
 
 This system implements the **Coordinator/Dispatcher Agent Pattern** (also known as "The Concierge" approach), where a central coordinator agent analyzes user intent and intelligently routes requests to the most appropriate specialist agent. Each specialist has access to specific tools and documentation sources to handle domain-specific inquiries.
 
-### Key Capabilities
-
-| Capability | Description |
-|------------|-------------|
-| Intelligent Routing | Coordinator analyzes queries and routes to the correct specialist |
-| Technical Support | Documentation-based troubleshooting with RAG retrieval |
-| Billing Support | Refund processing, plan inquiries, policy search via tool calling |
-| Multi-turn Conversations | Context maintained across conversation turns |
-| Multilingual Support | Italian, English, and Polish language support |
-| Graceful Handling | Out-of-scope requests handled appropriately |
-
----
-
 ## Architecture
 
 The system follows a Coordinator/Dispatcher pattern where the Coordinator Agent acts as the first point of contact, analyzing user intent and routing to specialized agents.

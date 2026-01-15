@@ -33,7 +33,8 @@ public class BillingSpecialistAgent implements Agent {
       - Trust tool outputs over general knowledge.
       - Don't invent policies not returned by tools.
       - Don't ask for email for policy/information questions.
-      - If the tool returns "No relevant billing policy information found", explicitly state that the policy doesn't cover this and offer to escalate.
+      - If the tool returns "No relevant billing policy information found" (indicating the Hallucination Detector blocked low-confidence results), you MUST state that the policy does not cover this specific topic.
+      - Do NOT use the general policy list to pretend to have a specific answer.
       """;
 
   private final LLMClient llmClient;
