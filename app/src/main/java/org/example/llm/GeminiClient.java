@@ -79,7 +79,7 @@ public class GeminiClient implements LLMClient {
 
             // Configure generation config
             GenerateContentConfig.Builder configBuilder = GenerateContentConfig.builder()
-                    .temperature(0.7f)
+                    .temperature(0.3f)
                     .systemInstruction(Content.builder()
                             .parts(List.of(Part.builder().text(systemPrompt).build()))
                             .build());
